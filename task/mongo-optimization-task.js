@@ -268,12 +268,12 @@ async function task_3_1(db) {
       }
     },
     {
-      $lookup: {
-        from: "clientCriteria",
-        let: { criteria_value: "$criteria_value" },
-        pipeline: [
+      "$lookup": {
+        "from": "clientCriteria",
+        "let": { "criteria_value": "$criteria_value" },
+        "pipeline": [
           {
-            $project: {
+            "$project": {
               "definition": 1,
               "label": 1,
               "value": 1,
@@ -281,15 +281,15 @@ async function task_3_1(db) {
             }
           },
           {
-            $match: {
-              $and: [
+            "$match": {
+              "$and": [
                 { "versions.initiativeId": ObjectId("58af4da0b310d92314627290") },
-                { $expr: { $eq: ["$value", "$$criteria_value"] } }
+                { "$expr": { "$eq": ["$value", "$$criteria_value"] } }
               ]
             }
           }
         ],
-        as: "criteria"
+        "as": "criteria"
       }
     },
     {
@@ -310,11 +310,11 @@ async function task_3_1(db) {
             "answer_value": "$contacts.questions.answers.primary_answer_value",
             "selected": "$contacts.questions.answers.loopInstances.is_selected",
             "value": "$criteria_value",
-            "text": { $first: "$criteria.label" },
+            "text": { "$first": "$criteria.label" },
             "definition": {
               "$ifNull": [
-                { $first: { $first: "$criteria.versions.definition" } },
-                { $first: "$criteria.definition" }
+                { "$first": { "$first": "$criteria.versions.definition" } },
+                { "$first": "$criteria.definition" }
               ]
             }
           }
@@ -324,9 +324,9 @@ async function task_3_1(db) {
         }
       }
     },
-    { $unwind: '$answers' },
+    { "$unwind": '$answers' },
     {
-      $sort: {
+      "$sort": {
         'answer_text': 1,
         'answers.question_id': 1,
         'answers.answer_value': 1
