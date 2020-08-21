@@ -47,7 +47,7 @@ async function task_1_2(db) {
         SELECT OrderID as 'Order Id',
           SUM(UnitPrice * Quantity) as 'Order Total Price',
           ROUND(SUM(Discount * Quantity) * 100 / SUM(UnitPrice * Quantity), 3) as 'Total Order Discount, %'
-        FROM Orderdetails
+        FROM OrderDetails
         GROUP BY OrderID
         ORDER BY OrderID DESC; 
     `);
@@ -371,7 +371,7 @@ async function task_1_19(db) {
         SUM(d.UnitPrice * d.Quantity) as 'TotalOrdersAmount, $'
         FROM Customers c
         INNER JOIN Orders o ON c.CustomerID=o.CustomerID
-        INNER JOIN Orderdetails d ON o.OrderID=d.OrderID
+        INNER JOIN OrderDetails d ON o.OrderID=d.OrderID
         GROUP BY c.CustomerID
         HAVING \`TotalOrdersAmount, $\` > 10000
         ORDER BY \`TotalOrdersAmount, $\` DESC, c.CustomerID;
@@ -394,7 +394,7 @@ async function task_1_20(db) {
         SUM(d.UnitPrice * d.Quantity) as 'Amount, $'
         FROM Employees e
         INNER JOIN Orders o ON e.EmployeeID=o.EmployeeID
-        INNER JOIN Orderdetails d ON o.OrderID=d.OrderID
+        INNER JOIN OrderDetails d ON o.OrderID=d.OrderID
         GROUP BY e.EmployeeID
         ORDER BY \`Amount, $\` DESC
         LIMIT 1;
@@ -413,7 +413,7 @@ async function task_1_21(db) {
         SELECT o.OrderID,
         SUM(d.UnitPrice * d.Quantity) as 'Maximum Purchase Amount, $'
         FROM Orders o
-        INNER JOIN Orderdetails d ON o.OrderID=d.OrderID
+        INNER JOIN OrderDetails d ON o.OrderID=d.OrderID
         GROUP BY o.OrderID
         ORDER BY \`Maximum Purchase Amount, $\` DESC
         LIMIT 1;
@@ -435,14 +435,14 @@ async function task_1_22(db) {
             SELECT c.CompanyName, p.ProductName, d.UnitPrice
             FROM Customers c
             INNER JOIN Orders o ON c.CustomerID=o.CustomerID
-            INNER JOIN Orderdetails d ON o.orderID=d.OrderID
+            INNER JOIN OrderDetails d ON o.orderID=d.OrderID
             INNER JOIN Products p ON p.ProductId=d.ProductID
             ) sub
         INNER JOIN (
             SELECT c.CompanyName, MAX(d.UnitPrice) as PricePerItem
             FROM Customers c
             INNER JOIN Orders o ON c.CustomerID=o.CustomerID
-            INNER JOIN Orderdetails d ON o.orderID=d.OrderID
+            INNER JOIN OrderDetails d ON o.orderID=d.OrderID
             INNER JOIN Products p ON p.ProductId=d.ProductID
             GROUP BY c.CompanyName
             ) sub2
