@@ -313,8 +313,8 @@ async function task_3_1(db) {
             "text": { "$first": "$criteria.label" },
             "definition": {
               "$ifNull": [
-                { "$first": { "$first": "$criteria.versions.definition" } },
-                { "$first": "$criteria.definition" }
+                { "$arrayElemAt": [{ "$arrayElemAt": ["$criteria.versions.definition", 0] }, 0]},
+                { "$arrayElemAt": ["$criteria.definition", 0] }
               ]
             }
           }
@@ -333,8 +333,6 @@ async function task_3_1(db) {
       }
     }
   ], { allowDiskUse: true }).toArray();
-  // console.log(result);
-  // throw new Error("Not implemented");
   return result;
 }
 
