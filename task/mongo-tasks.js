@@ -21,7 +21,7 @@
  * Test timeout is increased to 15sec for the function.
  * */
 async function before(db) {
-  await db.collection('employees').ensureIndex({ CustomerID: 1 });
+    await db.collection('employees').ensureIndex({CustomerID: 1});
 }
 
 /**
@@ -31,20 +31,20 @@ async function before(db) {
  * NOTES: if City is null - show city as "Unspecified"
  */
 async function task_1_1(db) {
-  // The first task is example, please follow the style in the next functions.
-  const result = await db.collection('employees').aggregate([
-    {
-      $project: {
-        _id: 0,
-        EmployeeID: 1,
-        "Employee Full Name": { $concat: ["$FirstName", " ", "$LastName"] },
-        Title: 1,
-        City: { $ifNull: ['$City', "Unspecified"] }
-      }
-    },
-    { $sort: { City: 1, "Employee Full Name": 1 } }
-  ]).toArray();
-  return result;
+    // The first task is example, please follow the style in the next functions.
+    const result = await db.collection('employees').aggregate([
+        {
+            $project: {
+                _id: 0,
+                EmployeeID: 1,
+                "Employee Full Name": {$concat: ["$FirstName", " ", "$LastName"]},
+                Title: 1,
+                City: {$ifNull: ['$City', "Unspecified"]}
+            }
+        },
+        {$sort: {City: 1, "Employee Full Name": 1}}
+    ]).toArray();
+    return result;
 }
 
 /**
@@ -68,7 +68,7 @@ async function task_1_2(db) {
       $project: {
         _id: 0,
         "Order Id": "$_id",
-        "Order Total Price": {$round: ["$Price", 3]},
+        "Order Total Price": { $round: ["$Price", 3] },
         "Total Order Discount, %": { $round: [{ $multiply: [{ $divide: ["$Discount", "$Price"] }, 100] }, 3] },
       }
     },
@@ -202,8 +202,8 @@ async function task_1_6(db) {
       $project: {
         _id: 0,
         ProductName: 1,
-        CategoryName: { $first: "$categoryInfo.CategoryName" },
-        SupplierCompanyName: { $first: "$supplierInfo.CompanyName" }
+        CategoryName: { $arrayElemAt: ["$categoryInfo.CategoryName", 0] },
+        SupplierCompanyName: { $arrayElemAt: ["$supplierInfo.CompanyName", 0] }
       }
     },
     { $sort: { ProductName: 1, SupplierCompanyName: 1 } },
@@ -235,7 +235,7 @@ async function task_1_7(db) {
         _id: 0,
         EmployeeID: 1,
         FullName: { $concat: ["$TitleOfCourtesy", "$FirstName", " ", "$LastName"] },
-        ReportsTo: { $ifNull: [{ $concat: [{ $first: "$reportInfo.FirstName" }, " ", { $first: "$reportInfo.LastName" }] }, '-'] }
+        ReportsTo: { $ifNull: [{ $concat: [{ $arrayElemAt: ["$reportInfo.FirstName", 0] }, " ", { $arrayElemAt: ["$reportInfo.LastName", 0] }] }, '-'] }
       }
     },
     { $sort: { EmployeeID: 1 } },
@@ -268,7 +268,7 @@ async function task_1_8(db) {
     {
       $project: {
         _id: 0,
-        CategoryName: { $first: "$categoryInfo.CategoryName" },
+        CategoryName: { $arrayElemAt: ["$categoryInfo.CategoryName", 0] },
         TotalNumberOfProducts: 1
       }
     },
@@ -655,7 +655,7 @@ async function task_1_19(db) {
     {
       $project: {
         _id: 0,
-        CustomerID: { $first: "$orderInfo.CustomerID" },
+        CustomerID: { $arrayElemAt: ["$orderInfo.CustomerID", 0] },
         TotalPrice: { $multiply: ["$UnitPrice", "$Quantity"] }
       }
     },
@@ -683,7 +683,7 @@ async function task_1_19(db) {
       $project: {
         _id: 0,
         CustomerID: "$_id",
-        CompanyName: { $first: "$customerInfo.CompanyName" },
+        CompanyName: { $arrayElemAt: ["$customerInfo.CompanyName", 0] },
         "TotalOrdersAmount, $": { $round: ["$TotalPrice", 2] },
       }
     },
@@ -710,7 +710,7 @@ async function task_1_20(db) {
     {
       $project: {
         _id: 0,
-        EmployeeID: { $first: "$orderInfo.EmployeeID" },
+        EmployeeID: { $arrayElemAt: ["$orderInfo.EmployeeID", 0] },
         TotalPrice: { $multiply: ["$UnitPrice", "$Quantity"] }
       }
     },
@@ -733,7 +733,7 @@ async function task_1_20(db) {
       $project: {
         _id: 0,
         EmployeeID: "$_id",
-        "Employee Full Name": { $concat: [{ $first: "$employeeInfo.FirstName" }, ' ', { $first: "$employeeInfo.LastName" }] },
+        "Employee Full Name": { $concat: [{ $arrayElemAt: ["$employeeInfo.FirstName", 0] }, ' ', { $arrayElemAt: ["$employeeInfo.LastName", 0] }] },
         "Amount, $": "$TotalPrice",
       }
     },
@@ -807,12 +807,12 @@ async function task_1_22(db) {
         CustomerID: 1,
         CompanyName: 1,
         Orders: {
-          $first: {
+          $arrayElemAt: [{
             $filter: {
               input: "$Orders",
               cond: { $eq: ["$$this.UnitPrice", { $max: "$Orders.UnitPrice" }] }
             }
-          }
+          }, 0]
         }
       }
     },
@@ -829,7 +829,7 @@ async function task_1_22(db) {
         _id: 0,
         CustomerID: 1,
         CompanyName: 1,
-        ProductName: { $first: "$productInfo.ProductName" },
+        ProductName: { $arrayElemAt: ["$productInfo.ProductName", 0] },
         PricePerItem: "$Orders.UnitPrice"
       }
     },
@@ -844,27 +844,27 @@ async function task_1_22(db) {
 }
 
 module.exports = {
-  before: before,
-  task_1_1: task_1_1,
-  task_1_2: task_1_2,
-  task_1_3: task_1_3,
-  task_1_4: task_1_4,
-  task_1_5: task_1_5,
-  task_1_6: task_1_6,
-  task_1_7: task_1_7,
-  task_1_8: task_1_8,
-  task_1_9: task_1_9,
-  task_1_10: task_1_10,
-  task_1_11: task_1_11,
-  task_1_12: task_1_12,
-  task_1_13: task_1_13,
-  task_1_14: task_1_14,
-  task_1_15: task_1_15,
-  task_1_16: task_1_16,
-  task_1_17: task_1_17,
-  task_1_18: task_1_18,
-  task_1_19: task_1_19,
-  task_1_20: task_1_20,
-  task_1_21: task_1_21,
-  task_1_22: task_1_22
+    before: before,
+    task_1_1: task_1_1,
+    task_1_2: task_1_2,
+    task_1_3: task_1_3,
+    task_1_4: task_1_4,
+    task_1_5: task_1_5,
+    task_1_6: task_1_6,
+    task_1_7: task_1_7,
+    task_1_8: task_1_8,
+    task_1_9: task_1_9,
+    task_1_10: task_1_10,
+    task_1_11: task_1_11,
+    task_1_12: task_1_12,
+    task_1_13: task_1_13,
+    task_1_14: task_1_14,
+    task_1_15: task_1_15,
+    task_1_16: task_1_16,
+    task_1_17: task_1_17,
+    task_1_18: task_1_18,
+    task_1_19: task_1_19,
+    task_1_20: task_1_20,
+    task_1_21: task_1_21,
+    task_1_22: task_1_22
 };
