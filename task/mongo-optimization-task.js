@@ -310,7 +310,7 @@ async function task_3_1(db) {
             "answer_value": "$contacts.questions.answers.primary_answer_value",
             "selected": "$contacts.questions.answers.loopInstances.is_selected",
             "value": "$criteria_value",
-            "text": { "$first": "$criteria.label" },
+            "text": { "$arrayElemAt": ["$criteria.label", 0] },
             "definition": {
               "$ifNull": [
                 { "$arrayElemAt": [{ "$arrayElemAt": ["$criteria.versions.definition", 0] }, 0]},
