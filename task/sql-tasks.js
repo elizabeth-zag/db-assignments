@@ -436,11 +436,10 @@ async function task_1_22(db) {
             INNER JOIN OrderDetails d ON o.orderID=d.OrderID
             INNER JOIN Products p ON p.ProductId=d.ProductID
             WHERE d.UnitPrice = (
-				      SELECT MAX(UnitPrice) FROM Customers c2
+				  SELECT MAX(UnitPrice) FROM Customers c2
                   INNER JOIN Orders o2 ON c.CustomerID=o2.CustomerID
                   INNER JOIN OrderDetails od2 ON od2.OrderID=o2.OrderID
-                  WHERE c.CustomerID=c2.CustomerID
-              )
+                  WHERE c.CustomerID=c2.CustomerID)
 			ORDER BY PricePerItem DESC, c.CompanyName, p.ProductName;
     `);
   return result[0];
