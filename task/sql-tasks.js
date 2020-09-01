@@ -286,19 +286,21 @@ async function task_1_14(db) {
  */
 async function task_1_15(db) {
   let result = await db.query(`
-        SELECT * FROM
-        (SELECT COUNT(*) as 'January' FROM Orders WHERE MONTH(OrderDate) = '1' AND YEAR(OrderDate) = '1997') j,
-        (SELECT COUNT(*) as 'February' FROM Orders WHERE MONTH(OrderDate) = '2' AND YEAR(OrderDate) = '1997') f,
-        (SELECT COUNT(*) as 'March' FROM Orders WHERE MONTH(OrderDate) = '3' AND YEAR(OrderDate) = '1997') mr,
-        (SELECT COUNT(*) as 'April' FROM Orders WHERE MONTH(OrderDate) = '4' AND YEAR(OrderDate) = '1997') a,
-        (SELECT COUNT(*) as 'May' FROM Orders WHERE MONTH(OrderDate) = '5' AND YEAR(OrderDate) = '1997') m,
-        (SELECT COUNT(*) as 'June' FROM Orders WHERE MONTH(OrderDate) = '6' AND YEAR(OrderDate) = '1997') jn,
-        (SELECT COUNT(*) as 'July' FROM Orders WHERE MONTH(OrderDate) = '7' AND YEAR(OrderDate) = '1997') jl,
-        (SELECT COUNT(*) as 'August' FROM Orders WHERE MONTH(OrderDate) = '8' AND YEAR(OrderDate) = '1997') au,
-        (SELECT COUNT(*) as 'September' FROM Orders WHERE MONTH(OrderDate) = '9' AND YEAR(OrderDate) = '1997') s,
-        (SELECT COUNT(*) as 'October' FROM Orders WHERE MONTH(OrderDate) = '10' AND YEAR(OrderDate) = '1997') o,
-        (SELECT COUNT(*) as 'November' FROM Orders WHERE MONTH(OrderDate) = '11' AND YEAR(OrderDate) = '1997') n,
-        (SELECT COUNT(*) as 'December' FROM Orders WHERE MONTH(OrderDate) = '12' AND YEAR(OrderDate) = '1997') d;
+        SELECT
+          SUM(MONTH(OrderDate) = '1') as 'January',
+          SUM(MONTH(OrderDate) = '2') as 'February',
+          SUM(MONTH(OrderDate) = '3') as 'March',
+          SUM(MONTH(OrderDate) = '4') as 'April',
+          SUM(MONTH(OrderDate) = '5') as 'May',
+          SUM(MONTH(OrderDate) = '6') as 'June',
+          SUM(MONTH(OrderDate) = '7') as 'July',
+          SUM(MONTH(OrderDate) = '8') as 'August',
+          SUM(MONTH(OrderDate) = '9') as 'September',
+          SUM(MONTH(OrderDate) = '10') as 'October',
+          SUM(MONTH(OrderDate) = '11') as 'November',
+          SUM(MONTH(OrderDate) = '12') as 'December'    
+      FROM Orders
+      WHERE YEAR(OrderDate) = '1997';
     `);
   return result[0];
 }
@@ -430,17 +432,18 @@ async function task_1_21(db) {
  */
 async function task_1_22(db) {
   let result = await db.query(`
-        SELECT DISTINCT c.CompanyName, p.ProductName, d.UnitPrice as 'PricePerItem'
-            FROM Customers c
-            INNER JOIN Orders o ON c.CustomerID=o.CustomerID
-            INNER JOIN OrderDetails d ON o.orderID=d.OrderID
-            INNER JOIN Products p ON p.ProductId=d.ProductID
-            WHERE d.UnitPrice = (
-				  SELECT MAX(UnitPrice) FROM Customers c2
+      SELECT DISTINCT c.CompanyName, p.ProductName, d.UnitPrice as 'PricePerItem'
+          FROM Customers c
+          INNER JOIN Orders o ON c.CustomerID=o.CustomerID
+          INNER JOIN OrderDetails d ON o.orderID=d.OrderID
+          INNER JOIN Products p ON p.ProductId=d.ProductID
+          WHERE d.UnitPrice = (
+              SELECT MAX(UnitPrice) FROM Customers c2
                   INNER JOIN Orders o2 ON c.CustomerID=o2.CustomerID
                   INNER JOIN OrderDetails od2 ON od2.OrderID=o2.OrderID
-                  WHERE c.CustomerID=c2.CustomerID)
-			ORDER BY PricePerItem DESC, c.CompanyName, p.ProductName;
+                  WHERE c.CustomerID=c2.CustomerID
+                  )
+          ORDER BY PricePerItem DESC, c.CompanyName, p.ProductName;
     `);
   return result[0];
 }
