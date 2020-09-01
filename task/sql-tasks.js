@@ -21,8 +21,8 @@
  *
  */
 async function task_1_1(db) {
-    // The first task is example, please follow the style in the next functions.
-    let result = await db.query(`
+  // The first task is example, please follow the style in the next functions.
+  let result = await db.query(`
         SELECT
            EmployeeID as "Employee Id",
            CONCAT(FirstName, ' ', LastName) AS "Employee Full Name",
@@ -31,7 +31,7 @@ async function task_1_1(db) {
         FROM Employees
         ORDER BY City, "Employee Full Name"
     `);
-    return result[0];
+  return result[0];
 }
 
 /**
@@ -185,7 +185,7 @@ async function task_1_9(db) {
   let result = await db.query(`
         SELECT CustomerID, ContactName
         FROM Customers
-        WHERE REGEXP_LIKE(ContactName, '^f..n');
+        WHERE ContactName LIKE 'f__n%';
     `);
   return result[0];
 }
@@ -287,18 +287,18 @@ async function task_1_14(db) {
 async function task_1_15(db) {
   let result = await db.query(`
         SELECT * FROM
-        (SELECT COUNT(*) as 'January' FROM Orders WHERE OrderDate LIKE '1997-01%') j,
-        (SELECT COUNT(*) as 'February' FROM Orders WHERE OrderDate LIKE '1997-02%') f,
-        (SELECT COUNT(*) as 'March' FROM Orders WHERE OrderDate LIKE '1997-03%') mr,
-        (SELECT COUNT(*) as 'April' FROM Orders WHERE OrderDate LIKE '1997-04%') a,
-        (SELECT COUNT(*) as 'May' FROM Orders WHERE OrderDate LIKE '1997-05%') m,
-        (SELECT COUNT(*) as 'June' FROM Orders WHERE OrderDate LIKE '1997-06%') jn,
-        (SELECT COUNT(*) as 'July' FROM Orders WHERE OrderDate LIKE '1997-07%') jl,
-        (SELECT COUNT(*) as 'August' FROM Orders WHERE OrderDate LIKE '1997-08%') au,
-        (SELECT COUNT(*) as 'September' FROM Orders WHERE OrderDate LIKE '1997-09%') s,
-        (SELECT COUNT(*) as 'October' FROM Orders WHERE OrderDate LIKE '1997-10%') o,
-        (SELECT COUNT(*) as 'November' FROM Orders WHERE OrderDate LIKE '1997-11%') n,
-        (SELECT COUNT(*) as 'December' FROM Orders WHERE OrderDate LIKE '1997-12%') d;
+        (SELECT COUNT(*) as 'January' FROM Orders WHERE MONTH(OrderDate) = '1' AND YEAR(OrderDate) = '1997') j,
+        (SELECT COUNT(*) as 'February' FROM Orders WHERE MONTH(OrderDate) = '2' AND YEAR(OrderDate) = '1997') f,
+        (SELECT COUNT(*) as 'March' FROM Orders WHERE MONTH(OrderDate) = '3' AND YEAR(OrderDate) = '1997') mr,
+        (SELECT COUNT(*) as 'April' FROM Orders WHERE MONTH(OrderDate) = '4' AND YEAR(OrderDate) = '1997') a,
+        (SELECT COUNT(*) as 'May' FROM Orders WHERE MONTH(OrderDate) = '5' AND YEAR(OrderDate) = '1997') m,
+        (SELECT COUNT(*) as 'June' FROM Orders WHERE MONTH(OrderDate) = '6' AND YEAR(OrderDate) = '1997') jn,
+        (SELECT COUNT(*) as 'July' FROM Orders WHERE MONTH(OrderDate) = '7' AND YEAR(OrderDate) = '1997') jl,
+        (SELECT COUNT(*) as 'August' FROM Orders WHERE MONTH(OrderDate) = '8' AND YEAR(OrderDate) = '1997') au,
+        (SELECT COUNT(*) as 'September' FROM Orders WHERE MONTH(OrderDate) = '9' AND YEAR(OrderDate) = '1997') s,
+        (SELECT COUNT(*) as 'October' FROM Orders WHERE MONTH(OrderDate) = '10' AND YEAR(OrderDate) = '1997') o,
+        (SELECT COUNT(*) as 'November' FROM Orders WHERE MONTH(OrderDate) = '11' AND YEAR(OrderDate) = '1997') n,
+        (SELECT COUNT(*) as 'December' FROM Orders WHERE MONTH(OrderDate) = '12' AND YEAR(OrderDate) = '1997') d;
     `);
   return result[0];
 }
@@ -351,7 +351,7 @@ async function task_1_18(db) {
   let result = await db.query(`
         SELECT DATE_FORMAT(OrderDate, '%Y-%m-%d %T') as 'OrderDate', COUNT(*) as 'Total Number of Orders'
         FROM Orders
-        WHERE OrderDate LIKE '1998%'
+        WHERE YEAR(OrderDate) = '1998'
         GROUP BY OrderDate;
     `);
   return result[0];
@@ -430,27 +430,22 @@ async function task_1_21(db) {
  */
 async function task_1_22(db) {
   let result = await db.query(`
-        SELECT DISTINCT sub.CompanyName, sub.ProductName, PricePerItem
-        FROM (
-            SELECT c.CompanyName, p.ProductName, d.UnitPrice
+        SELECT DISTINCT c.CompanyName, p.ProductName, d.UnitPrice as 'PricePerItem'
             FROM Customers c
             INNER JOIN Orders o ON c.CustomerID=o.CustomerID
             INNER JOIN OrderDetails d ON o.orderID=d.OrderID
             INNER JOIN Products p ON p.ProductId=d.ProductID
-            ) sub
-        INNER JOIN (
-            SELECT c.CompanyName, MAX(d.UnitPrice) as PricePerItem
-            FROM Customers c
-            INNER JOIN Orders o ON c.CustomerID=o.CustomerID
-            INNER JOIN OrderDetails d ON o.orderID=d.OrderID
-            INNER JOIN Products p ON p.ProductId=d.ProductID
-            GROUP BY c.CompanyName
-            ) sub2
-        ON sub.CompanyName=sub2.CompanyName AND sub.UnitPrice=sub2.PricePerItem
-        ORDER BY PricePerItem DESC, sub.CompanyName, sub.ProductName;
+            WHERE d.UnitPrice = (
+				      SELECT MAX(UnitPrice) FROM Customers c2
+                  INNER JOIN Orders o2 ON c.CustomerID=o2.CustomerID
+                  INNER JOIN OrderDetails od2 ON od2.OrderID=o2.OrderID
+                  WHERE c.CustomerID=c2.CustomerID
+              )
+			ORDER BY PricePerItem DESC, c.CompanyName, p.ProductName;
     `);
   return result[0];
 }
+
 
 module.exports = {
     task_1_1: task_1_1,
